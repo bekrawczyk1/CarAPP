@@ -9,6 +9,16 @@ type Vehicle = {
   price: number | null
 }
 
+type YearRange = {
+  min: number
+  max: number
+}
+
+type PriceRange = {
+  min: number
+  max: number
+}
+
 const vehicles: Vehicle[] = [
   { id: 1, make: 'Toyota', model: 'Corolla', year: 2015, price: null },
   { id: 2, make: 'Jeep', model: 'Wrangler', year: 2019, price: 30000 },
@@ -25,6 +35,9 @@ const fetchVehicles = () =>
 function App() {
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([])
   const [filterText, setFilterText] = useState('')
+  const [selectedMakes, setSelectedMakes] = useState<string[]>([])
+  const [yearRange, setYearRange] = useState<YearRange>({ min: 2015, max: 2020 })
+  const [priceRange, setPriceRange] = useState<PriceRange>({ min: 0, max: 37000 })
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [editingVehicleId, setEditingVehicleId] = useState<number | null>(null)
   const [draftPrice, setDraftPrice] = useState('')
@@ -36,6 +49,19 @@ function App() {
     fetchVehicles().then((data) => {
       if (isMounted) {
         setAllVehicles(data)
+
+        const years = data.map((vehicle) => vehicle.year)
+        const minYear = Math.min(...years)
+        const maxYear = Math.max(...years)
+        const prices = data
+          .map((vehicle) => vehicle.price)
+          .filter((price): price is number => price !== null)
+
+        const minPrice = Math.min(...prices)
+        const maxPrice = Math.max(...prices)
+
+        setYearRange({ min: minYear, max: maxYear })
+        setPriceRange({ min: minPrice, max: maxPrice })
         setIsLoading(false)
       }
     })
@@ -45,21 +71,36 @@ function App() {
     }
   }, [])
 
+  const availableMakes = useMemo(
+    () => [...new Set(allVehicles.map((vehicle) => vehicle.make))].sort(),
+    [allVehicles],
+  )
+
   const visibleVehicles = useMemo(() => {
     const term = filterText.trim().toLowerCase()
 
     const filtered = allVehicles.filter((vehicle) => {
-      if (!term) return true
+      const textMatch =
+        !term ||
+        [
+          vehicle.make,
+          vehicle.model,
+          String(vehicle.year),
+          vehicle.price === null ? 'n/a' : `\$${vehicle.price}`,
+          vehicle.price === null ? 'null' : String(vehicle.price),
+        ].some((value) => value.toLowerCase().includes(term))
 
-      const searchableValues = [
-        vehicle.make,
-        vehicle.model,
-        String(vehicle.year),
-        vehicle.price === null ? 'n/a' : `$${vehicle.price}`,
-        vehicle.price === null ? 'null' : String(vehicle.price),
-      ]
+      const makeMatch =
+        selectedMakes.length === 0 || selectedMakes.includes(vehicle.make)
 
-      return searchableValues.some((value) => value.toLowerCase().includes(term))
+      const yearMatch =
+        vehicle.year >= yearRange.min && vehicle.year <= yearRange.max
+
+      const vehiclePrice = vehicle.price ?? 0
+      const priceMatch =
+        vehiclePrice >= priceRange.min && vehiclePrice <= priceRange.max
+
+      return textMatch && makeMatch && yearMatch && priceMatch
     })
 
     return [...filtered].sort((a, b) => {
@@ -72,7 +113,7 @@ function App() {
 
       return bPrice - aPrice
     })
-  }, [allVehicles, filterText, sortDirection])
+  }, [allVehicles, filterText, selectedMakes, sortDirection, yearRange, priceRange])
 
   const handleEditStart = (vehicle: Vehicle) => {
     setEditingVehicleId(vehicle.id)
@@ -97,21 +138,187 @@ function App() {
     setDraftPrice('')
   }
 
+  const toggleMake = (make: string) => {
+    setSelectedMakes((currentSelected) =>
+      currentSelected.includes(make)
+        ? currentSelected.filter((item) => item !== make)
+        : [...currentSelected, make],
+    )
+  }
+
+  const clearFilters = () => {
+    setFilterText('')
+    setSelectedMakes([])
+    setYearRange({
+      min: Math.min(...allVehicles.map((vehicle) => vehicle.year)),
+      max: Math.max(...allVehicles.map((vehicle) => vehicle.year)),
+    })
+    setPriceRange({
+      min: Math.min(...allVehicles.map((vehicle) => vehicle.price ?? 0)),
+      max: Math.max(...allVehicles.map((vehicle) => vehicle.price ?? 0)),
+    })
+  }
+
+  const minYear = Math.min(...allVehicles.map((vehicle) => vehicle.year))
+  const maxYear = Math.max(...allVehicles.map((vehicle) => vehicle.year))
+  const minPrice = Math.min(...allVehicles.map((vehicle) => vehicle.price ?? 0))
+  const maxPrice = Math.max(...allVehicles.map((vehicle) => vehicle.price ?? 0))
+
+  const handleYearRangeChange = (type: 'min' | 'max', value: number) => {
+    setYearRange((currentRange) => {
+      if (type === 'min') {
+        return { min: Math.min(value, currentRange.max), max: currentRange.max }
+      }
+
+      return { min: currentRange.min, max: Math.max(value, currentRange.min) }
+    })
+  }
+
+  const handlePriceRangeChange = (type: 'min' | 'max', value: number) => {
+    setPriceRange((currentRange) => {
+      if (type === 'min') {
+        return { min: Math.min(value, currentRange.max), max: currentRange.max }
+      }
+
+      return { min: currentRange.min, max: Math.max(value, currentRange.min) }
+    })
+  }
+
+  const getRangeTrackStyle = (
+    currentMin: number,
+    currentMax: number,
+    absoluteMin: number,
+    absoluteMax: number,
+  ) => {
+    const minPercent = ((currentMin - absoluteMin) / (absoluteMax - absoluteMin || 1)) * 100
+    const maxPercent = ((currentMax - absoluteMin) / (absoluteMax - absoluteMin || 1)) * 100
+
+    return {
+      background: `linear-gradient(
+        to right,
+        #e2e8f0 0%,
+        #e2e8f0 ${minPercent}%,
+        #2563eb ${minPercent}%,
+        #2563eb ${maxPercent}%,
+        #e2e8f0 ${maxPercent}%,
+        #e2e8f0 100%
+      )`,
+    }
+  }
+
   return (
     <main className="vehicle-app">
       <section className="vehicle-panel">
-        <div className="toolbar">
-          <label className="filter-label" htmlFor="vehicle-filter">
-            Filter
-          </label>
-          <input
-            id="vehicle-filter"
-            type="text"
-            value={filterText}
-            onChange={(event) => setFilterText(event.target.value)}
-            placeholder="Search make, model, year, or price"
-            aria-label="Filter vehicles"
-          />
+        <div className="filter-section">
+          <div className="filter-group">
+            <label htmlFor="vehicle-filter">Search</label>
+            <input
+              id="vehicle-filter"
+              type="text"
+              value={filterText}
+              onChange={(event) => setFilterText(event.target.value)}
+              placeholder="Search make, model, year, or price"
+              aria-label="Search vehicles"
+            />
+          </div>
+
+          <div className="filter-group">
+            <p className="section-title">Available makes</p>
+            <div className="make-list">
+              {availableMakes.map((make) => {
+                const isSelected = selectedMakes.includes(make)
+
+                return (
+                  <button
+                    key={make}
+                    type="button"
+                    className={`make-chip ${isSelected ? 'selected' : ''}`}
+                    onClick={() => toggleMake(make)}
+                  >
+                    {make}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="filter-group">
+            <p className="section-title">Year</p>
+            <div className="year-range">
+              <div className="year-range-readout">
+                <span>From {yearRange.min}</span>
+                <span>To {yearRange.max}</span>
+              </div>
+
+              <div
+                className="dual-range-wrap"
+                style={getRangeTrackStyle(yearRange.min, yearRange.max, minYear, maxYear)}
+              >
+                <input
+                  type="range"
+                  min={minYear}
+                  max={maxYear}
+                  value={yearRange.min}
+                  onChange={(event) =>
+                    handleYearRangeChange('min', Number(event.target.value))
+                  }
+                  className="range min-range"
+                />
+                <input
+                  type="range"
+                  min={minYear}
+                  max={maxYear}
+                  value={yearRange.max}
+                  onChange={(event) =>
+                    handleYearRangeChange('max', Number(event.target.value))
+                  }
+                  className="range max-range"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="filter-group">
+            <p className="section-title">Price</p>
+            <div className="year-range">
+              <div className="year-range-readout">
+                <span>From ${priceRange.min.toLocaleString()}</span>
+                <span>To ${priceRange.max.toLocaleString()}</span>
+              </div>
+
+              <div
+                className="dual-range-wrap"
+                style={getRangeTrackStyle(priceRange.min, priceRange.max, minPrice, maxPrice)}
+              >
+                <input
+                  type="range"
+                  min={minPrice}
+                  max={maxPrice}
+                  value={priceRange.min}
+                  onChange={(event) =>
+                    handlePriceRangeChange('min', Number(event.target.value))
+                  }
+                  className="range min-range"
+                />
+                <input
+                  type="range"
+                  min={minPrice}
+                  max={maxPrice}
+                  value={priceRange.max}
+                  onChange={(event) =>
+                    handlePriceRangeChange('max', Number(event.target.value))
+                  }
+                  className="range max-range"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="filter-actions">
+            <button type="button" className="secondary-button" onClick={clearFilters}>
+              Clear filters
+            </button>
+          </div>
         </div>
 
         <div className="table-header">
@@ -135,7 +342,13 @@ function App() {
         </div>
 
         {isLoading ? (
-          <div className="status">Loading vehicles...</div>
+          <div className="loading-state" aria-live="polite">
+            <div className="loading-spinner" aria-hidden="true" />
+            <div className="loading-copy">
+              <strong>Loading vehicles</strong>
+              <span>Searching available cars…</span>
+            </div>
+          </div>
         ) : visibleVehicles.length === 0 ? (
           <div className="status">No vehicles match your filter.</div>
         ) : (
