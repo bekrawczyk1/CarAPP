@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { Button } from './ui/Button'
 import type { SortDirection, Vehicle } from '../types/vehicle'
 
@@ -26,7 +27,9 @@ export function VehicleTable({
 }: VehicleTableProps) {
   if (isLoading) {
     return (
-      <div
+      <section
+        aria-label="Vehicle results"
+        aria-busy="true"
         className="flex items-center justify-center gap-4 rounded-b-2xl border border-stone-200 bg-gradient-to-r from-stone-50 to-amber-50 px-5 py-8 text-stone-600"
         aria-live="polite"
       >
@@ -35,12 +38,17 @@ export function VehicleTable({
           <strong className="text-base font-semibold text-stone-800">Loading vehicles</strong>
           <span className="text-sm text-stone-500">Searching available cars…</span>
         </div>
-      </div>
+      </section>
     )
   }
 
   return (
-    <>
+    <section aria-label="Vehicle results" aria-busy="false">
+      <p className="sr-only" role="status" aria-live="polite">
+        {vehicles.length === 0
+          ? 'No vehicles match your filter.'
+          : `${vehicles.length} ${vehicles.length === 1 ? 'vehicle' : 'vehicles'} shown.`}
+      </p>
       <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,1.5fr)_minmax(0,0.7fr)] items-center gap-3 rounded-t-2xl border border-stone-200 bg-stone-50/90 px-4 py-3 text-sm font-semibold text-stone-600 sm:grid">
         <span>Make</span>
         <span>Model</span>
@@ -51,6 +59,7 @@ export function VehicleTable({
             variant="ghost"
             className="whitespace-nowrap p-0 text-sm"
             onClick={onToggleSort}
+            aria-label={`Sort by price, currently ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
           >
             Sort by Price {sortDirection === 'asc' ? '↑' : '↓'}
           </Button>
@@ -79,7 +88,7 @@ export function VehicleTable({
           </ul>
         )}
       </div>
-    </>
+    </section>
   )
 }
 
@@ -100,6 +109,9 @@ function VehicleRow({
   onDraftPriceChange,
   onSavePrice,
 }: VehicleRowProps) {
+  const priceInputId = useId()
+  const editingStatusId = `${priceInputId}-status`
+
   return (
     <li className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 px-4 py-4 transition-colors duration-150 hover:bg-amber-50/60 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,1.5fr)_minmax(0,0.7fr)] sm:items-center">
       <span className="flex min-w-0 flex-col gap-1 text-sm font-medium text-stone-700">
@@ -123,16 +135,24 @@ function VehicleRow({
       <span className={`min-w-0 pr-3 text-sm text-stone-700 sm:pr-4 sm:text-right ${isEditing ? 'sm:col-span-2' : ''}`}>
         {isEditing ? (
           <div className="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-2 rounded-xl border border-amber-300 bg-amber-50 px-2.5 py-2 shadow-sm">
-            <span className="w-full max-w-full whitespace-normal text-center text-xs font-bold uppercase tracking-[0.06em] text-amber-800 sm:w-auto sm:whitespace-nowrap sm:text-left">
+            <span
+              id={editingStatusId}
+              role="status"
+              aria-live="polite"
+              className="w-full max-w-full whitespace-normal text-center text-xs font-bold uppercase tracking-[0.06em] text-amber-800 sm:w-auto sm:whitespace-nowrap sm:text-left"
+            >
               Editing price
             </span>
             <input
+              id={priceInputId}
               type="number"
               min="0"
               step="1"
               value={draftPrice}
+              autoFocus
               onChange={(event) => onDraftPriceChange(event.target.value)}
-              aria-label={`Edit price for ${vehicle.make} ${vehicle.model}`}
+              aria-label={`Price for ${vehicle.make} ${vehicle.model}`}
+              aria-describedby={editingStatusId}
               className="w-20 max-w-full rounded-lg border-2 border-amber-300 bg-white px-2.5 py-2 text-right text-sm font-semibold text-stone-700 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-amber-100 sm:w-24"
             />
             <Button type="button" className="w-full sm:w-auto" onClick={() => onSavePrice(vehicle.id)}>

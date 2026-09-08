@@ -21,7 +21,7 @@ export function Button({
   return (
     <button
       {...props}
-      className={`rounded-lg px-2.5 py-2 text-xs font-semibold transition ${variantClasses[variant]} ${className}`}
+      className={`rounded-lg px-2.5 py-2 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-200 focus-visible:ring-offset-2 ${variantClasses[variant]} ${className}`}
     />
   )
 }

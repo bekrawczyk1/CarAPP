@@ -8,7 +8,23 @@ const vehicles: Vehicle[] = [
   { id: 5, make: 'BMW', model: 'X3', year: 2018, price: 37000 },
 ]
 
-export const fetchVehicles = () =>
-  new Promise<Vehicle[]>((resolve) => {
-    setTimeout(() => resolve(vehicles), 1000)
-  })
+let vehiclesCache: Vehicle[] | null = null
+let vehiclesRequest: Promise<Vehicle[]> | null = null
+
+export const fetchVehicles = () => {
+  if (vehiclesCache) {
+    return Promise.resolve(vehiclesCache)
+  }
+
+  if (!vehiclesRequest) {
+    vehiclesRequest = new Promise<Vehicle[]>((resolve) => {
+      setTimeout(() => resolve(vehicles), 1000)
+    }).then((data) => {
+      vehiclesCache = data
+      vehiclesRequest = null
+      return data
+    })
+  }
+
+  return vehiclesRequest
+}

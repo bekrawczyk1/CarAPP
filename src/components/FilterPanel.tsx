@@ -52,10 +52,10 @@ export function FilterPanel({
         />
       </div>
 
-      <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-3">
-        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.08em] text-stone-700">
+      <fieldset className="rounded-2xl border border-stone-200 bg-stone-50/80 p-3">
+        <legend className="mb-2 text-sm font-semibold uppercase tracking-[0.08em] text-stone-700">
           Available makes
-        </p>
+        </legend>
         <div className="flex flex-wrap gap-2">
           {availableMakes.map((make) => {
             const isSelected = selectedMakes.includes(make)
@@ -70,13 +70,14 @@ export function FilterPanel({
                     : 'border-stone-200 bg-white text-stone-700 hover:border-amber-300 hover:bg-amber-50'
                 }`}
                 onClick={() => onToggleMake(make)}
+                aria-pressed={isSelected}
               >
                 {make}
               </button>
             )
           })}
         </div>
-      </div>
+      </fieldset>
 
       <RangeSlider
         label="Year"

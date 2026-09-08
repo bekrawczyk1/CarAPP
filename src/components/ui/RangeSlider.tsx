@@ -42,10 +42,10 @@ export function RangeSlider({
   onChange,
 }: RangeSliderProps) {
   return (
-    <div className={`rounded-2xl border border-stone-200 bg-stone-50/80 p-4 ${className}`}>
-      <p className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-stone-700">
+    <fieldset className={`rounded-2xl border border-stone-200 bg-stone-50/80 p-4 ${className}`}>
+      <legend className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-stone-700">
         {label}
-      </p>
+      </legend>
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between text-sm font-medium text-stone-600">
           <span>From {formatValue(value.min)}</span>
@@ -67,10 +67,11 @@ export function RangeSlider({
               onChange={(event) => onChange(type, Number(event.target.value))}
               className={`range-slider ${type}-range`}
               aria-label={`${label} ${type}`}
+              aria-valuetext={formatValue(value[type])}
             />
           ))}
         </div>
       </div>
-    </div>
+    </fieldset>
   )
 }

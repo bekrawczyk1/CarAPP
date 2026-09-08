@@ -44,7 +44,7 @@ function App() {
   const visibleVehicles = useMemo(() => {
     const term = deferredFilterText.trim().toLowerCase()
 
-    return [...allVehicles]
+    return allVehicles
       .filter((vehicle) =>
         matchesFilters(
           vehicle,
@@ -64,10 +64,7 @@ function App() {
     deferredPriceRange,
   ])
 
-  const minYear = getMinimum(allVehicles.map((vehicle) => vehicle.year))
-  const maxYear = getMaximum(allVehicles.map((vehicle) => vehicle.year))
-  const minPrice = getMinimum(allVehicles.map((vehicle) => vehicle.price ?? 0))
-  const maxPrice = getMaximum(allVehicles.map((vehicle) => vehicle.price ?? 0))
+  const bounds = useMemo(() => getVehicleBounds(allVehicles), [allVehicles])
 
   const handleEditPriceStart = (vehicle: Vehicle) => {
     setEditingPriceVehicleId(vehicle.id)
@@ -115,10 +112,10 @@ function App() {
           availableMakes={availableMakes}
           yearRange={yearRange}
           priceRange={priceRange}
-          minYear={minYear}
-          maxYear={maxYear}
-          minPrice={minPrice}
-          maxPrice={maxPrice}
+          minYear={bounds.year.min}
+          maxYear={bounds.year.max}
+          minPrice={bounds.price.min}
+          maxPrice={bounds.price.max}
           onFilterTextChange={setFilterText}
           onToggleMake={(make) => {
             setSelectedMakes((currentSelected) =>
@@ -201,6 +198,13 @@ function getYearRange(vehicles: Vehicle[]): Range {
 function getPriceRange(vehicles: Vehicle[]): Range {
   const prices = vehicles.map((vehicle) => vehicle.price ?? 0)
   return { min: getMinimum(prices), max: getMaximum(prices) }
+}
+
+function getVehicleBounds(vehicles: Vehicle[]) {
+  return {
+    year: getYearRange(vehicles),
+    price: getPriceRange(vehicles),
+  }
 }
 
 function getMinimum(values: number[]) {
