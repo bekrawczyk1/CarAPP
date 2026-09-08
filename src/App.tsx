@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import './App.css'
 
 type Vehicle = {
   id: number
@@ -196,22 +195,24 @@ function App() {
     return {
       background: `linear-gradient(
         to right,
-        #e2e8f0 0%,
-        #e2e8f0 ${minPercent}%,
-        #2563eb ${minPercent}%,
-        #2563eb ${maxPercent}%,
-        #e2e8f0 ${maxPercent}%,
-        #e2e8f0 100%
+        #d6d3c8 0%,
+        #d6d3c8 ${minPercent}%,
+        #166534 ${minPercent}%,
+        #166534 ${maxPercent}%,
+        #d6d3c8 ${maxPercent}%,
+        #d6d3c8 100%
       )`,
     }
   }
 
   return (
-    <main className="vehicle-app">
-      <section className="vehicle-panel">
-        <div className="filter-section">
-          <div className="filter-group">
-            <label htmlFor="vehicle-filter">Search</label>
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(245,158,11,0.14),transparent_30%),linear-gradient(180deg,#fffdf7_0%,#f1f7ef_100%)] px-4 py-10 sm:px-6 lg:px-8">
+      <section className="mx-auto w-full max-w-5xl rounded-[28px] border border-stone-200/80 bg-[#fffdf9]/85 p-5 shadow-[0_24px_80px_rgba(54,65,47,0.1)] backdrop-blur-sm sm:p-8">
+        <div className="mb-6 flex flex-col gap-4">
+          <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-4 shadow-inner shadow-white/80">
+            <label htmlFor="vehicle-filter" className="mb-2 block text-sm font-semibold text-stone-800">
+              Search
+            </label>
             <input
               id="vehicle-filter"
               type="text"
@@ -219,12 +220,15 @@ function App() {
               onChange={(event) => setFilterText(event.target.value)}
               placeholder="Search make, model, year, or price"
               aria-label="Search vehicles"
+              className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-3 text-base text-stone-900 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-amber-100"
             />
           </div>
 
-          <div className="filter-group">
-            <p className="section-title">Available makes</p>
-            <div className="make-list">
+          <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-4">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-stone-700">
+              Available makes
+            </p>
+            <div className="flex flex-wrap gap-2.5">
               {availableMakes.map((make) => {
                 const isSelected = selectedMakes.includes(make)
 
@@ -232,7 +236,11 @@ function App() {
                   <button
                     key={make}
                     type="button"
-                    className={`make-chip ${isSelected ? 'selected' : ''}`}
+                    className={`rounded-full border px-3 py-2 text-sm font-medium transition-all ${
+                      isSelected
+                        ? 'border-emerald-200 bg-emerald-100 text-emerald-800 shadow-[0_8px_18px_rgba(22,101,52,0.14)]'
+                        : 'border-stone-200 bg-white text-stone-700 hover:border-amber-300 hover:bg-amber-50'
+                    }`}
                     onClick={() => toggleMake(make)}
                   >
                     {make}
@@ -242,16 +250,18 @@ function App() {
             </div>
           </div>
 
-          <div className="filter-group">
-            <p className="section-title">Year</p>
-            <div className="year-range">
-              <div className="year-range-readout">
+          <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-4">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-stone-700">
+              Year
+            </p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between text-sm font-medium text-stone-600">
                 <span>From {yearRange.min}</span>
                 <span>To {yearRange.max}</span>
               </div>
 
               <div
-                className="dual-range-wrap"
+                className="relative h-6 overflow-visible rounded-full bg-stone-200"
                 style={getRangeTrackStyle(yearRange.min, yearRange.max, minYear, maxYear)}
               >
                 <input
@@ -262,7 +272,7 @@ function App() {
                   onChange={(event) =>
                     handleYearRangeChange('min', Number(event.target.value))
                   }
-                  className="range min-range"
+                  className="range-slider min-range"
                 />
                 <input
                   type="range"
@@ -272,22 +282,24 @@ function App() {
                   onChange={(event) =>
                     handleYearRangeChange('max', Number(event.target.value))
                   }
-                  className="range max-range"
+                  className="range-slider max-range"
                 />
               </div>
             </div>
           </div>
 
-          <div className="filter-group">
-            <p className="section-title">Price</p>
-            <div className="year-range">
-              <div className="year-range-readout">
+          <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-4">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-stone-700">
+              Price
+            </p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between text-sm font-medium text-stone-600">
                 <span>From ${priceRange.min.toLocaleString()}</span>
                 <span>To ${priceRange.max.toLocaleString()}</span>
               </div>
 
               <div
-                className="dual-range-wrap"
+                className="relative h-6 overflow-visible rounded-full bg-stone-200"
                 style={getRangeTrackStyle(priceRange.min, priceRange.max, minPrice, maxPrice)}
               >
                 <input
@@ -298,7 +310,7 @@ function App() {
                   onChange={(event) =>
                     handlePriceRangeChange('min', Number(event.target.value))
                   }
-                  className="range min-range"
+                  className="range-slider min-range"
                 />
                 <input
                   type="range"
@@ -308,27 +320,31 @@ function App() {
                   onChange={(event) =>
                     handlePriceRangeChange('max', Number(event.target.value))
                   }
-                  className="range max-range"
+                  className="range-slider max-range"
                 />
               </div>
             </div>
           </div>
 
-          <div className="filter-actions">
-            <button type="button" className="secondary-button" onClick={clearFilters}>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="rounded-xl border border-stone-200 bg-stone-100 px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-amber-100"
+              onClick={clearFilters}
+            >
               Clear filters
             </button>
           </div>
         </div>
 
-        <div className="table-header">
+        <div className="hidden grid-cols-[1.4fr_1.4fr_0.8fr_1.5fr_0.7fr] items-center gap-3 rounded-t-2xl border border-stone-200 bg-stone-50/90 px-4 py-3 text-sm font-semibold text-stone-600 sm:grid">
           <span>Make</span>
           <span>Model</span>
           <span>Year</span>
-          <span className="price-column">
+          <span>
             <button
               type="button"
-              className="sort-button"
+              className="font-semibold text-stone-700 transition hover:text-emerald-800"
               onClick={() =>
                 setSortDirection((currentSort) =>
                   currentSort === 'asc' ? 'desc' : 'asc',
@@ -342,25 +358,33 @@ function App() {
         </div>
 
         {isLoading ? (
-          <div className="loading-state" aria-live="polite">
-            <div className="loading-spinner" aria-hidden="true" />
-            <div className="loading-copy">
-              <strong>Loading vehicles</strong>
-              <span>Searching available cars…</span>
+          <div
+            className="flex items-center justify-center gap-4 rounded-b-2xl border border-stone-200 bg-gradient-to-r from-stone-50 to-amber-50 px-5 py-8 text-stone-600"
+            aria-live="polite"
+          >
+            <div className="h-7 w-7 animate-spin rounded-full border-3 border-amber-200 border-t-emerald-700" aria-hidden="true" />
+            <div className="flex flex-col gap-1">
+              <strong className="text-base font-semibold text-stone-800">Loading vehicles</strong>
+              <span className="text-sm text-stone-500">Searching available cars…</span>
             </div>
           </div>
         ) : visibleVehicles.length === 0 ? (
-          <div className="status">No vehicles match your filter.</div>
+          <div className="rounded-b-2xl border border-stone-200 bg-stone-50 px-4 py-5 text-sm text-stone-600">
+            No vehicles match your filter.
+          </div>
         ) : (
-          <ul className="vehicle-list">
+          <ul className="divide-y divide-stone-200 overflow-hidden rounded-b-2xl border border-stone-200 bg-white">
             {visibleVehicles.map((vehicle) => (
-              <li key={vehicle.id} className="vehicle-row">
-                <span>{vehicle.make}</span>
-                <span>{vehicle.model}</span>
-                <span>{vehicle.year}</span>
-                <span className="price-cell">
+              <li
+                key={vehicle.id}
+                className="grid gap-3 px-4 py-4 sm:grid-cols-[1.4fr_1.4fr_0.8fr_1.5fr_0.7fr] sm:items-center"
+              >
+                <span className="text-sm font-medium text-stone-700">{vehicle.make}</span>
+                <span className="text-sm font-medium text-stone-700">{vehicle.model}</span>
+                <span className="text-sm text-stone-600">{vehicle.year}</span>
+                <span className="text-sm text-stone-700">
                   {editingVehicleId === vehicle.id ? (
-                    <div className="price-editor">
+                    <div className="flex items-center gap-2">
                       <input
                         type="number"
                         min="0"
@@ -368,8 +392,13 @@ function App() {
                         value={draftPrice}
                         onChange={(event) => setDraftPrice(event.target.value)}
                         aria-label={`Edit price for ${vehicle.make} ${vehicle.model}`}
+                        className="w-24 rounded-lg border border-stone-200 bg-white px-2.5 py-2 text-sm text-stone-700 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-amber-100"
                       />
-                      <button type="button" onClick={() => handleSavePrice(vehicle.id)}>
+                      <button
+                        type="button"
+                        className="rounded-lg bg-emerald-700 px-2.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-800"
+                        onClick={() => handleSavePrice(vehicle.id)}
+                      >
                         Save
                       </button>
                     </div>
@@ -381,7 +410,11 @@ function App() {
                 </span>
                 <span>
                   {editingVehicleId === vehicle.id ? null : (
-                    <button type="button" onClick={() => handleEditStart(vehicle)}>
+                    <button
+                      type="button"
+                      className="rounded-lg bg-emerald-700 px-2.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-800"
+                      onClick={() => handleEditStart(vehicle)}
+                    >
                       Edit
                     </button>
                   )}
