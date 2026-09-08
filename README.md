@@ -1,76 +1,77 @@
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
 # CarAPP
+
+CarAPP is a responsive vehicle inventory interface built with React, TypeScript, Vite, and Tailwind CSS.
+
+## Features
+
+- Search vehicles by make, model, year, or price
+- Filter by multiple makes
+- Filter by year and price ranges with reusable dual-handle sliders
+- Sort prices in ascending or descending order
+- Edit vehicle prices inline
+- Loading, empty, and responsive mobile states
+- Keyboard and screen-reader accessibility support for interactive controls
+- Cached vehicle loading and deferred filtering for smoother interaction
+
+## Getting Started
+
+Requirements:
+
+- Node.js 18 or newer
+- npm
+
+Install dependencies and start the development server:
+
+```bash
+npm install
+npm run dev
+```
+
+## Scripts
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server |
+| `npm run build` | Type-check and create a production build |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run the Vitest test suite once |
+| `npm run test:watch` | Run Vitest in watch mode |
+| `npm run test:coverage` | Run tests and generate text/HTML coverage reports |
+
+## Project Structure
+
+```text
+src/
+  App.tsx                     Application state and composition
+  components/
+    FilterPanel.tsx           Search, make, and range filters
+    VehicleTable.tsx          Results, sorting, and inline price editing
+    ui/
+      Button.tsx              Shared button primitive
+      RangeSlider.tsx         Shared dual-handle range slider
+  data/
+    vehicles.ts               Vehicle data loader and in-memory cache
+  types/
+    vehicle.ts                Shared vehicle and range types
+  test/
+    setup.ts                  Testing Library setup
+  App.test.tsx                User-flow integration tests
+```
+
+## Testing Approach
+
+Tests use Vitest, React Testing Library, `user-event`, and jsdom. The suite focuses on user-visible workflows rather than implementation details, including loading, filtering, sliders, clearing filters, sorting, editing, and focus behavior.
+
+Coverage is generated with Vitest's V8 provider. The project enforces a minimum of 80% for statements, branches, functions, and lines.
+
+## Performance Notes
+
+The current client-side implementation uses:
+
+- `useDeferredValue` for responsive filtering while dragging sliders
+- `useMemo` for derived vehicle results and range bounds
+- A shared in-memory cache and in-flight request reuse for vehicle loading
+- A stable results area to reduce layout movement during filtering
+
+For a substantially larger inventory, move filtering, sorting, and pagination to the server and add row virtualization, for example with `@tanstack/react-virtual`. A production API cache such as TanStack Query or SWR would also provide stale-data handling, refetching, and request cancellation.
