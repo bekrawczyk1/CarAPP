@@ -10,6 +10,7 @@ export type RangeSliderProps = {
   max: number
   step?: number
   formatValue?: (value: number) => string
+  className?: string
   onChange: RangeSliderChange
 }
 
@@ -37,10 +38,11 @@ export function RangeSlider({
   max,
   step = 1,
   formatValue = String,
+  className = '',
   onChange,
 }: RangeSliderProps) {
   return (
-    <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-4">
+    <div className={`rounded-2xl border border-stone-200 bg-stone-50/80 p-4 ${className}`}>
       <p className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-stone-700">
         {label}
       </p>
@@ -51,7 +53,7 @@ export function RangeSlider({
         </div>
 
         <div
-          className="relative h-6 overflow-visible rounded-full bg-stone-200"
+          className="relative h-0.5 overflow-visible rounded-full"
           style={getTrackStyle(value, min, max)}
         >
           {(['min', 'max'] as const).map((type) => (

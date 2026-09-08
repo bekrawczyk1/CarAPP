@@ -113,6 +113,12 @@ function App() {
           onClearFilters={clearFilters}
         />
 
+        <div className="my-5 flex items-center gap-3 sm:my-8" aria-hidden="true">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-300 to-stone-300" />
+          <div className="h-1.5 w-1.5 rounded-full bg-emerald-700 ring-4 ring-amber-100" />
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-stone-300 to-stone-300" />
+        </div>
+
         <VehicleTable
           vehicles={visibleVehicles}
           isLoading={isLoading}
