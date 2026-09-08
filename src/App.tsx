@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { FilterPanel } from './components/FilterPanel'
 import { VehicleTable } from './components/VehicleTable'
 import { fetchVehicles } from './data/vehicles'
@@ -11,9 +11,13 @@ function App() {
   const [yearRange, setYearRange] = useState<Range>({ min: 2015, max: 2020 })
   const [priceRange, setPriceRange] = useState<Range>({ min: 0, max: 37000 })
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
-  const [editingVehicleId, setEditingVehicleId] = useState<number | null>(null)
+  const [editingPriceVehicleId, setEditingPriceVehicleId] = useState<number | null>(null)
   const [draftPrice, setDraftPrice] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const deferredFilterText = useDeferredValue(filterText)
+  const deferredSelectedMakes = useDeferredValue(selectedMakes)
+  const deferredYearRange = useDeferredValue(yearRange)
+  const deferredPriceRange = useDeferredValue(priceRange)
 
   useEffect(() => {
     let isMounted = true
@@ -38,20 +42,35 @@ function App() {
   )
 
   const visibleVehicles = useMemo(() => {
-    const term = filterText.trim().toLowerCase()
+    const term = deferredFilterText.trim().toLowerCase()
 
     return [...allVehicles]
-      .filter((vehicle) => matchesFilters(vehicle, term, selectedMakes, yearRange, priceRange))
+      .filter((vehicle) =>
+        matchesFilters(
+          vehicle,
+          term,
+          deferredSelectedMakes,
+          deferredYearRange,
+          deferredPriceRange,
+        ),
+      )
       .sort((a, b) => compareByPrice(a, b, sortDirection))
-  }, [allVehicles, filterText, selectedMakes, sortDirection, yearRange, priceRange])
+  }, [
+    allVehicles,
+    deferredFilterText,
+    deferredSelectedMakes,
+    sortDirection,
+    deferredYearRange,
+    deferredPriceRange,
+  ])
 
   const minYear = getMinimum(allVehicles.map((vehicle) => vehicle.year))
   const maxYear = getMaximum(allVehicles.map((vehicle) => vehicle.year))
   const minPrice = getMinimum(allVehicles.map((vehicle) => vehicle.price ?? 0))
   const maxPrice = getMaximum(allVehicles.map((vehicle) => vehicle.price ?? 0))
 
-  const handleEditStart = (vehicle: Vehicle) => {
-    setEditingVehicleId(vehicle.id)
+  const handleEditPriceStart = (vehicle: Vehicle) => {
+    setEditingPriceVehicleId(vehicle.id)
     setDraftPrice(vehicle.price === null ? '' : String(vehicle.price))
   }
 
@@ -68,7 +87,7 @@ function App() {
         vehicle.id === vehicleId ? { ...vehicle, price: nextPrice } : vehicle,
       ),
     )
-    setEditingVehicleId(null)
+    setEditingPriceVehicleId(null)
     setDraftPrice('')
   }
 
@@ -123,12 +142,12 @@ function App() {
           vehicles={visibleVehicles}
           isLoading={isLoading}
           sortDirection={sortDirection}
-          editingVehicleId={editingVehicleId}
+          editingPriceVehicleId={editingPriceVehicleId}
           draftPrice={draftPrice}
           onToggleSort={() =>
             setSortDirection((currentSort) => (currentSort === 'asc' ? 'desc' : 'asc'))
           }
-          onEditStart={handleEditStart}
+          onEditPriceStart={handleEditPriceStart}
           onDraftPriceChange={setDraftPrice}
           onSavePrice={handleSavePrice}
         />
