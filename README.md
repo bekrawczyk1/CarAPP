@@ -75,3 +75,27 @@ The current client-side implementation uses:
 - A stable results area to reduce layout movement during filtering
 
 For a substantially larger inventory, move filtering, sorting, and pagination to the server and add row virtualization, for example with `@tanstack/react-virtual`. A production API cache such as TanStack Query or SWR would also provide stale-data handling, refetching, and request cancellation.
+
+## Deploying With GitHub Pages
+
+The repository includes a GitHub Actions workflow at `.github/workflows/deploy.yml`. It builds and deploys the app automatically whenever changes are pushed to `main`.
+
+1. Commit and push the project to the `main` branch:
+
+```bash
+git add .
+git commit -m "Deploy CarAPP"
+git push origin main
+```
+
+2. On GitHub, open the repository and go to **Settings** > **Pages**.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+4. Open the **Actions** tab and wait for the `Deploy to GitHub Pages` workflow to finish.
+
+The public URL will be:
+
+```text
+https://bekrawczyk1.github.io/CarAPP/
+```
+
+Every future push to `main` will redeploy the latest version. The workflow can also be started manually from the Actions tab with **Run workflow**.
